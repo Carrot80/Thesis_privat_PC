@@ -17,27 +17,33 @@ end
 %%  Main function
 
 function analysis ( PatientPath, PatientName)
-        PreConfig = [];                                           
-        PostConfig = [];
-        PathExt = {};
+
+               
+
         [PreConfig, PostConfig, PathExt] = SelectTimeWindowOfInterest();
+        
         % Reject all other patients but Illek
         if ( 0 == strcmp (PatientPath, 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_si_Illek'))
             return;
         end
         
-        PathDataInput       = strcat ( PatientPath, '\MEG\01_Input_noise_reduced');
-        PathPreprocessing   = strcat ( PatientPath, '\MEG\02_PreProcessing');
-        PathFreqAnalysis    = strcat ( PatientPath, '\MEG\03_FreqAnalysis', PathExt);
-        PathSourceAnalysis  = strcat ( PatientPath, '\MEG\05_SourceAnalysis', PathExt);
-        PathVolume          = strcat ( PatientPath, '\MEG\04_Volume');
-        PathMRI             = strcat ( PatientPath, '\MRI');
-        PathStatistics      = strcat ( PatientPath,'\MEG\07_Statistics', PathExt);
-        PathTemplateMRI     = 'C:\Kirsten\DatenDoktorarbeit\Alle\TemplateMRI';
-        PathLI              = strcat (PatientPath, '\MEG\08_LateralityIndices', PathExt);
-   %     PathInterpolation = strcat(PatientPath, '\MEG\06_Interpolation');  
+        Paths                         = [];
+        Paths.PathDataInput           = strcat ( PatientPath, '\MEG\01_Input_noise_reduced')            ;
+        Paths.PathPreprocessing       = strcat ( PatientPath, '\MEG\02_PreProcessing')                  ;
+        Paths.PathDataTimeOfInterest  = strcat ( PatientPath, '\MEG\03_DataTimeOfInterest', PathExt)    ;
+        Paths.PathVolume              = strcat ( PatientPath, '\MEG\04_Volume')                         ;
+        Paths.PathFreqAnalysis        = strcat ( PatientPath, '\MEG\05_FreqAnalysis', PathExt)          ;
+        Paths.PathSourceAnalysis      = strcat ( PatientPath, '\MEG\06_SourceAnalysis', PathExt)        ;
+        Paths.PathInterpolation       = strcat ( PatientPath, '\MEG\07_Interpolation', PathExt)         ;  
+        Paths.PathStatistics          = strcat ( PatientPath,'\MEG\08_Statistics', PathExt)             ;
+        Paths.PathLI                  = strcat ( PatientPath, '\MEG\09_LateralityIndices', PathExt)     ;
         
-%         kh_RedefineTrial (PreConfig, PostConfig)
+        Paths.PathTemplateMRI         = 'C:\Kirsten\DatenDoktorarbeit\Alle\TemplateMRI';
+        Paths.PathMRI                 = strcat ( PatientPath, '\MRI');
+        
+        MakeDataStructure(PreConfig, PostConfig, Paths )
+        
+%         kh_RedefineTrial (PreConfig, PostConfig, PathPreprocessing, CleanData)
 %         kh_VolumeSegment (PathMRI, PatientName, PathVolume )
 %         kh_PrepHeadModell (PathVolume, 'result_mri_realign_resliced_segmentedmri', 'mri_realign_resliced', PathDataInput, 'n_c,rfhp0.1Hz', PathPreprocessing, 'DataAll', 'RemovedChannels', PathMRI, PatientName)
 %         kh_SourceAnalysis_beta (PathPreprocessing, 'dataAll', 'dataPre', 'dataPost', PathVolume, 'grid_warped', 'vol_resliced', PathFreqAnalysis, PathSourceAnalysis, 'mri_realign_resliced')
@@ -61,17 +67,32 @@ PreConfig.toilim = [-0.5 0];
 PostConfig = [];
 PostConfig.toilim = [0.3 0.8]; 
 
-PathExt = strcat( '\', num2str( PreConfig.toilim(1)), num2str( PreConfig.toilim(2))); 
-PathExt = strcat(PathExt, num2str( PostConfig.toilim(1)), num2str( PostConfig.toilim(2))); 
+Convert2msec = PostConfig.toilim*1000;
+
+PathExt = strcat( '\', num2str( Convert2msec(1)), '_', num2str( Convert2msec(2)), 'ms'); 
+
+end
+
+function [MEG_analysis] = MakeDataStructure(PreConfig, PostConfig, Paths )
+
+Analysis                                             = [];
+Data_MEG_analysis.TimeWindowOfInterest.PreConfig     = PreConfig;
+Data_MEG_analysis.TimeWindowOfInterest.PostConfig    = PostConfig;
+Data_MEG_analysis.Paths                              = Paths;
+
+
 end
 
 
-function kh_RedefineTrial( PreConfig, PostConfig )
 
+function kh_RedefineTrial( Data_MEG_analysis)
+
+load strcat(PathPreprocessing, '\', CleanData, '.mat')
 
 % select time window of interest                    
 dataPre = ft_redefinetrial(PreConfig, CleanData);
-save dataPre dataPre
+
+File_dataPre = strcat 
 
 dataPost = ft_redefinetrial(PostConfig, CleanData);
 save dataPost dataPost
