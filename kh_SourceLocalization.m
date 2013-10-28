@@ -17,8 +17,10 @@ end
 %%  Main function
 
 function analysis ( PatientPath, PatientName)
-
-
+        PreConfig = [];                                           
+        PostConfig = [];
+        PathExt = {};
+        [PreConfig, PostConfig, PathExt] = SelectTimeWindowOfInterest();
         % Reject all other patients but Illek
         if ( 0 == strcmp (PatientPath, 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_si_Illek'))
             return;
@@ -26,23 +28,23 @@ function analysis ( PatientPath, PatientName)
         
         PathDataInput       = strcat ( PatientPath, '\MEG\01_Input_noise_reduced');
         PathPreprocessing   = strcat ( PatientPath, '\MEG\02_PreProcessing');
-        PathFreqAnalysis    = strcat ( PatientPath, '\MEG\03_FreqAnalysis');
-        PathSourceAnalysis  = strcat ( PatientPath, '\MEG\05_SourceAnalysis');
+        PathFreqAnalysis    = strcat ( PatientPath, '\MEG\03_FreqAnalysis', PathExt);
+        PathSourceAnalysis  = strcat ( PatientPath, '\MEG\05_SourceAnalysis', PathExt);
         PathVolume          = strcat ( PatientPath, '\MEG\04_Volume');
         PathMRI             = strcat ( PatientPath, '\MRI');
-        PathStatistics      = strcat ( PatientPath,'\MEG\07_Statistics');
+        PathStatistics      = strcat ( PatientPath,'\MEG\07_Statistics', PathExt);
         PathTemplateMRI     = 'C:\Kirsten\DatenDoktorarbeit\Alle\TemplateMRI';
-        PathLI              = strcat (PatientPath, '\MEG\08_LateralityIndices');
+        PathLI              = strcat (PatientPath, '\MEG\08_LateralityIndices', PathExt);
    %     PathInterpolation = strcat(PatientPath, '\MEG\06_Interpolation');  
         
-%         kh_RedefineTrial ()
+%         kh_RedefineTrial (PreConfig, PostConfig)
 %         kh_VolumeSegment (PathMRI, PatientName, PathVolume )
 %         kh_PrepHeadModell (PathVolume, 'result_mri_realign_resliced_segmentedmri', 'mri_realign_resliced', PathDataInput, 'n_c,rfhp0.1Hz', PathPreprocessing, 'DataAll', 'RemovedChannels', PathMRI, PatientName)
 %         kh_SourceAnalysis_beta (PathPreprocessing, 'dataAll', 'dataPre', 'dataPost', PathVolume, 'grid_warped', 'vol_resliced', PathFreqAnalysis, PathSourceAnalysis, 'mri_realign_resliced')
 %         kh_Interpolation_beta (PathSourceAnalysis, 'trial_sourcePre_13_25Hz', PathTemplateMRI, 'template_mri')
 %         kh_Interpolation_beta (PathSourceAnalysis, 'trial_sourcePost_13_25Hz', PathTemplateMRI, 'template_mri')
 %         kh_Statistics( PathSourceAnalysis,  'trial_sourcePre_13_25Hz_int', 'trial_sourcePost_13_25Hz_int', PathStatistics)
-        kh_PlotStatistics(PathStatistics, 'Stats_allRois_left', 'Stats_allRois_right', 'Stats_allRois_combined_hem', 'Stats_allRois_both_hem', 'Stats_NoROIs', PathMRI, 'mri_realign_resliced_norm')
+          kh_PlotStatistics(PathStatistics, 'Stats_allRois_left', 'Stats_allRois_right', 'Stats_allRois_combined_hem', 'Stats_allRois_both_hem', 'Stats_NoROIs', PathMRI, 'mri_realign_resliced_norm')
 %         [LI] = kh_Laterality_Index (PathStatistics, ResultStats_left, ResultStats_right, PathLI)
 
 
@@ -53,18 +55,25 @@ end
 
 %% Redefine trials:
 
+function [PreConfig, PostConfig, PathExt] = SelectTimeWindowOfInterest()
+PreConfig = [];                                           
+PreConfig.toilim = [-0.5 0];
+PostConfig = [];
+PostConfig.toilim = [0.3 0.8]; 
 
-function kh_RedefineTrial
+PathExt = strcat( '\', num2str( PreConfig.toilim(1)), num2str( PreConfig.toilim(2))); 
+PathExt = strcat(PathExt, num2str( PostConfig.toilim(1)), num2str( PostConfig.toilim(2))); 
+end
 
 
-% select time window of interest
-cfg = [];                                           
-cfg.toilim = [-0.5 0];                       
-dataPre = ft_redefinetrial(cfg, CleanData);
+function kh_RedefineTrial( PreConfig, PostConfig )
+
+
+% select time window of interest                    
+dataPre = ft_redefinetrial(PreConfig, CleanData);
 save dataPre dataPre
-   
-cfg.toilim = [0.3 0.8];                       
-dataPost = ft_redefinetrial(cfg, CleanData);
+
+dataPost = ft_redefinetrial(PostConfig, CleanData);
 save dataPost dataPost
 
 % trials sind unterschiedlich lang, deshalb alle kürzer als gewählte ...
