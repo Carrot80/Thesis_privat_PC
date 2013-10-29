@@ -2,22 +2,20 @@
 % import and segment MRI 
 
 
-function [mri_realign_resliced, mri_realign_resliced_segmentedmri] = kh_VolumeSegment (PathMRI, PatientName, PathVolume )
+function [MRI_realignment] = kh_VolumeSegment (PatientName, Path )
    
-mri             = strcat ( PathMRI, '\', PatientName, '.nii' ) ;
+mri             = strcat ( Path.MRI, '\', PatientName, '.nii' ) ;
 patients_mri    = ft_read_mri(mri);
 
 % define coordinate system:
 % [mri_coord]     = ft_determine_coordsys(patients_mri) %SPM Koordinatensystem genommen
 
-cfg_realign     = []
-[mri_realigned]   = ft_volumerealign(cfg_realign, patients_mri) %evtl. auch anteriore Kommisur definieren, da dies in SPM auch gemacht wird % hier nicht gemacht
+cfg_realign       = [];
+[mri_realigned]   = ft_volumerealign(cfg_realign, patients_mri); %evtl. auch anteriore Kommisur definieren, da dies in SPM auch gemacht wird % hier nicht gemacht
 
-File_MRIrealigned = strcat (PathVolume, '\', 'mri_realigned', '.mat' );
-save (File_MRIrealigned, 'mri_realigned');
 
 % reslicen, um 256x256x256 voxel zu erhalten => dann funktioniert wohl Segmentierung besser:
-cfg_reslice             = []
+cfg_reslice             = [] ;
 mri_realign_resliced    = ft_volumereslice(cfg_reslice, mri_realigned); 
 
 % downsamplen auf 2x2x2mm (128x128x128)
@@ -25,17 +23,14 @@ cfg_downsample              = [];
 cfg_downsample.downsample   = 2;
 mri_realign_resliced        = ft_volumedownsample(cfg_downsample, mri_realign_resliced);
 
-result_mri_realign_resliced = strcat( PathVolume, '\', 'mri_realign_resliced', '.mat' );
-save( result_mri_realign_resliced, 'mri_realign_resliced' );
-
-
 % normalization for later use (plot statistics):
 
  cfg_norm = [];
  cfg_norm.coordinates = [];   % 'spm, 'ctf' or empty for interactive (default = [])
  cfg_norm.downsample = 1;
- [mri_realign_resliced_norm] = ft_volumenormalise(cfg_norm, mri_realign_resliced)
- FILE_mri_realign_resliced_norm = strcat( PathMRI, '\', 'mri_realign_resliced_norm', '.mat' );
+ [mri_realign_resliced_norm] = ft_volumenormalise(cfg_norm, mri_realign_resliced) ;
+ 
+ FILE_mri_realign_resliced_norm = strcat( Path.MRI, '\', 'mri_realign_resliced_norm', '.mat' );
  save( FILE_mri_realign_resliced_norm, 'mri_realign_resliced_norm' );
 
 % segmentation: 
@@ -54,7 +49,7 @@ cfg_plot.funparameter       = 'brain';
 cfg_plot.location           = 'center';
 ft_sourceplot(cfg_plot, mri_realign_resliced_segmentedmri);
 title('segmented mri - brain');
-segmented_mri               = strcat( PathVolume, '\', 'segmented_mri' );
+segmented_mri               = strcat( Path.Volume, '\', 'segmented_mri' );
 print('-dpng',segmented_mri);
 
 seg_i                       = ft_datatype_segmentation(mri_realign_resliced_segmentedmri,'segmentationstyle','indexed');
@@ -63,12 +58,13 @@ cfg_plot.funparameter       = 'seg';
 cfg_plot.location           = 'center';
 ft_sourceplot(cfg_plot,seg_i);
 title('datatype_segmentation - brain - skull - scalp');
-datatype_segmentation       = strcat( PathVolume, '\', 'datatype_segmentation' );
+datatype_segmentation       = strcat( Path.Volume, '\', 'datatype_segmentation' );
 print('-dpng', datatype_segmentation);
 
-result_mri_realign_resliced_segmentedmri = strcat( PathVolume, '\', 'mri_realign_resliced_segmentedmri', '.mat' );
-save( result_mri_realign_resliced_segmentedmri, 'mri_realign_resliced_segmentedmri' );
+MRI_realignment = struct('mri_realigned', mri_realigned, 'mri_realign_resliced', mri_realign_resliced, 'mri_realign_resliced_segmentedmri', mri_realign_resliced_segmentedmri, 'patients_mri', patients_mri)
 
-clear mri_realign_resliced_segmentedmri mri_realign_resliced
+FileMRI_realignment = strcat( Path.Volume, '\', 'MRI_realignment', '.mat' );
+save( FileMRI_realignment, 'MRI_realignment' );
+
 
 end

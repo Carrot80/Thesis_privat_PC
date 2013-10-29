@@ -18,7 +18,7 @@ end
 
 function analysis ( PatientPath, PatientName)
       
-        [PreConfig, PostConfig, PathExt, TimeWindow_string] = SelectTimeWindowOfInterest();
+        [Config, PathExt] = SelectTimeWindowOfInterest();
         
         
         
@@ -28,15 +28,15 @@ function analysis ( PatientPath, PatientName)
         end
         
         Path                     = [];
-        Path.DataInput           = strcat ( PatientPath, '\MEG\01_Input_noise_reduced')            ;
-        Path.Preprocessing       = strcat ( PatientPath, '\MEG\02_PreProcessing')                  ;
-        Path.DataTimeOfInterest  = strcat ( PatientPath, '\MEG\03_DataTimeOfInterest', PathExt)    ;
-        Path.Volume              = strcat ( PatientPath, '\MEG\04_Volume')                         ;
-        Path.FreqAnalysis        = strcat ( PatientPath, '\MEG\05_FreqAnalysis', PathExt)          ;
-        Path.SourceAnalysis      = strcat ( PatientPath, '\MEG\06_SourceAnalysis', PathExt)        ;
-        Path.Interpolation       = strcat ( PatientPath, '\MEG\07_Interpolation', PathExt)         ;  
-        Path.Statistics          = strcat ( PatientPath,'\MEG\08_Statistics', PathExt)             ;
-        Path.LI                  = strcat ( PatientPath, '\MEG\09_LateralityIndices', PathExt)     ;
+        Path.DataInput           = strcat ( PatientPath, '\MEG\01_Input_noise_reduced')                 ;
+        Path.Preprocessing       = strcat ( PatientPath, '\MEG\02_PreProcessing')                       ;
+        Path.DataTimeOfInterest  = strcat ( PatientPath, '\MEG\03_DataTimeOfInterest', '\', PathExt)    ;
+        Path.Volume              = strcat ( PatientPath, '\MEG\04_Volume')                              ;
+        Path.FreqAnalysis        = strcat ( PatientPath, '\MEG\05_FreqAnalysis', '\', PathExt)          ;
+        Path.SourceAnalysis      = strcat ( PatientPath, '\MEG\06_SourceAnalysis', '\', PathExt)        ;
+        Path.Interpolation       = strcat ( PatientPath, '\MEG\07_Interpolation', '\', PathExt)         ;  
+        Path.Statistics          = strcat ( PatientPath, '\MEG\08_Statistics', '\', PathExt)            ;
+        Path.LI                  = strcat ( PatientPath, '\MEG\09_LateralityIndices', '\', PathExt)     ;
         
         Path.TemplateMRI         = 'C:\Kirsten\DatenDoktorarbeit\Alle\TemplateMRI';
         Path.MRI                 = strcat ( PatientPath, '\MRI');
@@ -47,18 +47,23 @@ function analysis ( PatientPath, PatientName)
         end
         
         
-         kh_RedefineTrial (PreConfig, PostConfig, TimeWindow_string, Path.Preprocessing, Path.DataTimeOfInterest)
+
+%         kh_RedefineTrial (Config, Path)       
+%         kh_VolumeSegment (PatientName, Path)
+%         kh_PrepHeadModell ('MRI_realignment', 'n_c,rfhp0.1Hz', 'Data', 'RemovedChannels', PatientName, Path)
+
+
+        [Config] = MakeConfig()
         
-%         kh_VolumeSegment (Path.MRI, PatientName, Path.Volume )
-%         kh_PrepHeadModell (Path.Volume, 'result_mri_realign_resliced_segmentedmri', 'mri_realign_resliced', Path.DataInput, 'n_c,rfhp0.1Hz', Path.Preprocessing, 'DataAll', 'RemovedChannels', Path.MRI, PatientName)
-
-
-%         [Config] = MakeConfig()
-%         kh_SourceAnalysis (Config.Frequency.Beta, Paths.PathPreprocessing, 'dataAll', 'dataPre', 'dataPost', Paths.PathVolume, 'grid_warped', 'vol_resliced', Paths.PathFreqAnalysis, Paths.PathSourceAnalysis, 'mri_realign_resliced')
-%         kh_SourceAnalysis (Config.Frequency.Alpha, Paths.PathPreprocessing, 'dataAll', 'dataPre', 'dataPost', Paths.PathVolume, 'grid_warped', 'vol_resliced', Paths.PathFreqAnalysis, Paths.PathSourceAnalysis, 'mri_realign_resliced')
-%         kh_SourceAnalysis (Config.Frequency.Theta, Paths.PathPreprocessing, 'dataAll', 'dataPre', 'dataPost', Paths.PathVolume, 'grid_warped', 'vol_resliced', Paths.PathFreqAnalysis, Paths.PathSourceAnalysis, 'mri_realign_resliced')
-%         kh_SourceAnalysis (Config.Frequency.Gamma, Paths.PathPreprocessing, 'dataAll', 'dataPre', 'dataPost', Paths.PathVolume, 'grid_warped', 'vol_resliced', Paths.PathFreqAnalysis, Paths.PathSourceAnalysis, 'mri_realign_resliced')
-%         
+       % hier weitermachen: auch Ordner für Beta, Gamma etc erstellen
+        kh_FreqAnalysis(Config.Frequency.Beta, 'Data', Path)
+        
+        
+        kh_SourceAnalysis (Config.Frequency.Beta, 'Data', 'MRI_realignment', 'Volume', Path)
+%         kh_SourceAnalysis (Config.Frequency.Alpha, 'Data', MRI_realignment, Volume, Path)
+%         kh_SourceAnalysis (Config.Frequency.Theta, 'Data', MRI_realignment, Volume, Path)
+%         kh_SourceAnalysis (Config.Frequency.Gamma, 'Data', MRI_realignment, Volume, Path)
+         
         
         
         
@@ -73,31 +78,32 @@ end
 
 %% Redefine trials:
 
-function [PreConfig, PostConfig, PathExt, TimeWindow_string] = SelectTimeWindowOfInterest()
-PreConfig = [];                                           
-PreConfig.toilim = [-0.5 0];
-PostConfig = [];
-PostConfig.toilim = [0.3 0.8]; 
+function [Config, PathExt] = SelectTimeWindowOfInterest()
+Config.Pre          = [];                                           
+Config.Pre.toilim   = [-0.5 0];
+Config.Post         = [];
+Config.Post.toilim  = [0.3 0.8]; 
 
-TimeWindow_ms = (PostConfig.toilim*1000);
-TimeWindow_string =  strcat(num2str(TimeWindow_ms(1)), '_', num2str(TimeWindow_ms(2)), 'ms');
+Config.TimeWindow_ms = [];
+Config.TimeWindow_ms = (Config.Post.toilim*1000);
+Config.TimeWindow_string =  strcat(num2str(Config.TimeWindow_ms(1)), '_', num2str(Config.TimeWindow_ms(2)), 'ms');
 
-PathExt = strcat( '\', num2str( TimeWindow_ms(1)), '_', num2str( TimeWindow_ms(2)), 'ms'); 
-
+% PathExt = strcat( '\', num2str( Config.TimeWindow_ms(1)), '_', num2str( Config.TimeWindow_ms(2)), 'ms'); 
+PathExt = Config.TimeWindow_string;
 end
 
 
 
 %%
 
-function kh_RedefineTrial( PreConfig, PostConfig, TimeWindow_string, PathPreprocessing, PathDataTimeOfInterest)
+function kh_RedefineTrial( ConfigFile, Path)
 
-load (strcat(PathPreprocessing, '\', 'CleanData', '.mat'));
+load (strcat(Path.Preprocessing, '\', 'CleanData', '.mat'));
      
 
     % select time window of interest                    
-    DataPre         = ft_redefinetrial(PreConfig, CleanData);
-    DataPst         = ft_redefinetrial(PostConfig, CleanData);
+    DataPre         = ft_redefinetrial(ConfigFile.Pre, CleanData);
+    DataPst         = ft_redefinetrial(ConfigFile.Post, CleanData);
 
 
     % trials sind unterschiedlich lang, deshalb alle kürzer als gewählte ...
@@ -142,9 +148,9 @@ load (strcat(PathPreprocessing, '\', 'CleanData', '.mat'));
 
     DataAll = ft_appenddata([], DataPre, DataPst);
     
-    Data = struct('DataPre', DataPre, 'DataPst', DataPst, 'DataAll', DataAll);
+    Data = struct('DataPre', DataPre, 'DataPst', DataPst, 'DataAll', DataAll, 'TimeWindow', ConfigFile.TimeWindow_string);
 
-    File_Data    = strcat (PathDataTimeOfInterest, '\', 'Data', '_', TimeWindow_string,'.mat');
+    File_Data    = strcat (Path.DataTimeOfInterest, '\', 'Data', '.mat');
     save (File_Data, 'Data')
     
 

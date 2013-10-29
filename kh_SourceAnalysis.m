@@ -1,43 +1,12 @@
 % Source Analysis:  Contrast activity to another interval
 
 
-function kh_SourceAnalysis ( ConfigFile, PathPreprocessing, DataAll, DataPre, DataPost, PathVolume, Grid, Vol, PathFreqAnalysis, PathSourceAnalysis, mri_realign_resliced)
+function kh_SourceAnalysis ( ConfigFile, Data, MRI_realignment, Volume, Path )
 
-     % load files:
      
-     FileDataAll            = strcat ( PathPreprocessing, '\', DataAll, '.mat' );
-     load ( FileDataAll );
-     FileDataPre            = strcat ( PathPreprocessing, '\', DataPre, '.mat' );
-     load ( FileDataPre );
-     FileDataPost           = strcat ( PathPreprocessing, '\', DataPost, '.mat' );
-     load ( FileDataPost );
-     FileGrid               = strcat ( PathVolume, '\', Grid, '.mat' );
+     FileGrid               = strcat ( Path.Volume, '\', Volume, '.mat' );
      load ( FileGrid );
-     FileVol                = strcat ( PathVolume, '\', Vol, '.mat' );
-     load ( FileVol );
-
-     % Calculating FFT and cross spectral density matrix:
-     
-     cfgFreq            = []                    ;
-     cfgFreq.method     = ConfigFile.method     ;
-     cfgFreq.output     = ConfigFile.output     ; 
-     cfgFreq.taper      = ConfigFile.taper      ;
-%      cfgFreq.tapsmofrq  = ConfigFile.tapsmofrq; % braucht man erst ab 30 Hz
-     cfgFreq.foilim     = ConfigFile.foilim     ;
-     cfgFreq.rawtrial   = 'yes';
-     cfgFreq.keeptrials = 'yes';
-     FreqAll            = ft_freqanalysis( cfgFreq, dataAll );
-     FreqPre            = ft_freqanalysis( cfgFreq, dataPre );
-     FreqPost           = ft_freqanalysis( cfgFreq, dataPost );
-     
-     ResultFreqAll      = strcat( PathFreqAnalysis, '\', 'FreqAll', '_', ConfigFile.string, '.mat' );
-     save( ResultFreqAll, FreqAll );
-     ResultFreqPre      = strcat( PathFreqAnalysis, '\', 'FreqPre', '_', ConfigFile.string, '.mat' );
-     save( ResultFreqPre, 'FreqPre' );    
-     ResultFreqPost     = strcat( PathFreqAnalysis, '\', 'FreqPost', '_', ConfigFile.string, '.mat' );
-     save( ResultFreqPost, 'FreqPost' ); 
-    
-     clear dataAll dataPre dataPost cfgFreq
+   
 
     % compute common spatial filter %
     
