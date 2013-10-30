@@ -3,6 +3,14 @@
 
 function kh_PrepHeadModell (Segmentation, MEGRawFile, DataFile, RemovedChannels, PatientName, Path)
 
+  % Check, if data is already avaliable
+     FileName = strcat(Path.Volume, '\', 'Volume', '.mat');
+         
+        if exist( FileName, 'file' )
+            return;
+        end
+        
+
     FileSegmentation            = strcat( Path.Volume, '\', Segmentation, '.mat');
     load( FileSegmentation );
  

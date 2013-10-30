@@ -24,8 +24,8 @@ function kh_Statistics( PathSourceAnalysis, Source_Pre, Source_Pst, PathStatisti
     cfg_stats.clusteralpha        =  0.05 ;                     % All samples are selected whose t-value is larger than some threshold as specified in cfg.clusteralpha. 
     cfg_stats.parameter           = 'pow';
     cfg_stats.clusterthreshold    = 'nonparametric_common'  ;      %'nonparametric_individual': computes a threshold per voxel; nonparametric_common: uses the same
-                                                            % threshold for all voxels  
-    cfg_stats.clusterstatistic    = 'maxsum';                %  how to combine the single samples that belong to a cluster, 'maxsum', 'maxsize', 'wcm' (default = 'maxsum')
+                                                                % threshold for all voxels  
+    cfg_stats.clusterstatistic    = 'maxsum';                   %  how to combine the single samples that belong to a cluster, 'maxsum', 'maxsize', 'wcm' (default = 'maxsum')
 %                                                                option 'wcm' refers to 'weighted cluster mass',  a statistic that combines cluster size and
 %                                                                intensity;  see Hayasaka & Nichols (2004) NeuroImage for details
     cfg_stats.correctm            = 'cluster';                    % correction of multiple comparisons:  'no', 'max', 'cluster', 'bonferoni', 'holms', or 'fdr' 
