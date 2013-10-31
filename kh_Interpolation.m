@@ -1,13 +1,29 @@
 %% Interpolation of Source to match template mri dimension
 
-function kh_Interpolation(PathSourceAnalysis, SourceFileName, PathTemplateMRI, TemplateMRI)
+function kh_Interpolation(ConfigFile, SourceFileName, TemplateMRI, Path)
+
+  % make frequency directory if not exists yet:
+    DirFreqName = strcat (Path.Interpolation, '\', ConfigFile.name);
+    [state] = mkdirIfNecessary( DirFreqName );
+    
+    % Check, if data is already avaliable
+     IntFileName = strcat(DirFreqName, '\', SourceFileName, '_', ConfigFile.string, '_int.mat');
+         
+        if exist( IntFileName, 'file' )
+            return;
+        end
+                
+        fprintf('starting with interpolation of %s freqency band \n', ConfigFile.name);
+        str = strcat (SourceFileName, '_', ConfigFile.string, '.mat');
+        fprintf('loading %s ...\n', str );
 
  % load Data
-    SourceFile = strcat( PathSourceAnalysis, '\', SourceFileName, '.mat');
+ 
+    SourceFile = strcat( Path.SourceAnalysis, '\', ConfigFile.name, '\', SourceFileName, '_', ConfigFile.string, '.mat');
     source_trials = load( SourceFile );
     source_trials = source_trials.(SourceFileName);
     
-   load( strcat( PathTemplateMRI, '\', TemplateMRI, '.mat'));
+   load( strcat( Path.TemplateMRI, '\', TemplateMRI, '.mat'));
      
 
    %% set config for interpolation
@@ -28,7 +44,7 @@ function kh_Interpolation(PathSourceAnalysis, SourceFileName, PathTemplateMRI, T
           
     source_trials_int.trial         = trials.trial;
     
-    IntFileName                     = strcat( PathSourceAnalysis, '\', SourceFileName, '_int.mat');
+    fprintf('saving %s ...\n', strcat (SourceFileName, '_', ConfigFile.string, '_int', '.mat') );
     save( IntFileName, 'source_trials_int' );
 
 

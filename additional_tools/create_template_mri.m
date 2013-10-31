@@ -6,3 +6,4 @@ function template_mri()
     save (PathTemplateMRI, 'template_mri');
     
 end
+

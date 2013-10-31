@@ -62,14 +62,22 @@ function analysis ( PatientPath, PatientName)
         kh_SourceAnalysis (FreqConfig.Theta, 'Data', 'MRI_realignment', 'Volume', Path)
         kh_SourceAnalysis (FreqConfig.Gamma, 'Data', 'MRI_realignment', 'Volume', Path)
          
+        kh_Interpolation (FreqConfig.Beta, 'trial_sourcePre', 'template_mri', Path)
+        kh_Interpolation (FreqConfig.Beta, 'trial_sourcePost', 'template_mri', Path)
+        kh_Interpolation (FreqConfig.Alpha, 'trial_sourcePre', 'template_mri', Path)
+        kh_Interpolation (FreqConfig.Alpha, 'trial_sourcePost', 'template_mri', Path)       
+        kh_Interpolation (FreqConfig.Theta, 'trial_sourcePre', 'template_mri', Path)
+        kh_Interpolation (FreqConfig.Theta, 'trial_sourcePost', 'template_mri', Path)    
+        kh_Interpolation (FreqConfig.Gamma, 'trial_sourcePre', 'template_mri', Path)
+        kh_Interpolation (FreqConfig.Gamma, 'trial_sourcePost', 'template_mri', Path)    
+         
+        kh_Statistics( FreqConfig.Beta, 'trial_sourcePre', 'trial_sourcePost', Path)
+%         kh_Statistics( FreqConfig.Alpha, 'trial_sourcePre', 'trial_sourcePost', Path)
+%         kh_Statistics( FreqConfig.Theta, 'trial_sourcePre', 'trial_sourcePost', Path)
+%         kh_Statistics( FreqConfig.Gamma, 'trial_sourcePre', 'trial_sourcePost', Path)
+
         
-        
-        
-%         kh_Interpolation (PathSourceAnalysis, 'trial_sourcePre_13_25Hz', PathTemplateMRI, 'template_mri')
-%         kh_Interpolation (PathSourceAnalysis, 'trial_sourcePost_13_25Hz', PathTemplateMRI, 'template_mri')
-%         kh_Statistics( PathSourceAnalysis,  'trial_sourcePre_13_25Hz_int', 'trial_sourcePost_13_25Hz_int', PathStatistics)
-%         kh_PlotStatistics(PathStatistics, 'Stats_allRois_left', 'Stats_allRois_right', 'Stats_allRois_combined_hem', 'Stats_allRois_both_hem', 'Stats_NoROIs', PathMRI, 'mri_realign_resliced_norm')
-%         [LI] = kh_LateralityIndex (PathStatistics, ResultStats_left, ResultStats_right, PathLI)
+        %         [LI] = kh_LateralityIndex (PathStatistics, ResultStats_left, ResultStats_right, PathLI)
 
       
 end
