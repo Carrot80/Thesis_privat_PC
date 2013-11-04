@@ -71,18 +71,37 @@ function analysis ( PatientPath, PatientName)
         kh_Interpolation (FreqConfig.Gamma, 'trial_sourcePre', 'template_mri', Path)
         kh_Interpolation (FreqConfig.Gamma, 'trial_sourcePost', 'template_mri', Path)    
          
-        kh_Statistics( FreqConfig.Beta, 'trial_sourcePre', 'trial_sourcePost', Path)
+        % statistics: erstellt automatisch Abbildungen, evtl. noch Info in
+        % Configfile, ob er Abbildung erstellen soll oder nicht:
+        
+%         kh_Statistics( FreqConfig.Beta, 'trial_sourcePre', 'trial_sourcePost', Path) 
 %         kh_Statistics( FreqConfig.Alpha, 'trial_sourcePre', 'trial_sourcePost', Path)
 %         kh_Statistics( FreqConfig.Theta, 'trial_sourcePre', 'trial_sourcePost', Path)
 %         kh_Statistics( FreqConfig.Gamma, 'trial_sourcePre', 'trial_sourcePost', Path)
 
         
-        %         [LI] = kh_LateralityIndex (PathStatistics, ResultStats_left, ResultStats_right, PathLI)
+            kh_LateralityIndex (FreqConfig.Beta, 'Stats_allRois_left', 'Stats_allRois_right', Path)
+            kh_LateralityIndex (FreqConfig.Beta, 'Stats_Broca_left', 'Stats_Broca_right', Path)                    
+            kh_LateralityIndex (FreqConfig.Beta, 'Stats_Wernicke_left', 'Stats_Wernicke_right', Path)        
+            kh_LateralityIndex (FreqConfig.Beta, 'Stats_TemporalLobe_left', 'Stats_TemporalLobe_right', Path)
+            kh_LateralityIndex (FreqConfig.Alpha, 'Stats_allRois_left', 'Stats_allRois_right', Path)
+            kh_LateralityIndex (FreqConfig.Alpha, 'Stats_Broca_left', 'Stats_Broca_right', Path)                    
+            kh_LateralityIndex (FreqConfig.Alpha, 'Stats_Wernicke_left', 'Stats_Wernicke_right', Path)        
+            kh_LateralityIndex (FreqConfig.Alpha, 'Stats_TemporalLobe_left', 'Stats_TemporalLobe_right', Path)
+            kh_LateralityIndex (FreqConfig.Theta, 'Stats_allRois_left', 'Stats_allRois_right', Path)
+            kh_LateralityIndex (FreqConfig.Theta, 'Stats_Broca_left', 'Stats_Broca_right', Path)                    
+            kh_LateralityIndex (FreqConfig.Theta, 'Stats_Wernicke_left', 'Stats_Wernicke_right', Path)        
+            kh_LateralityIndex (FreqConfig.Theta, 'Stats_TemporalLobe_left', 'Stats_TemporalLobe_right', Path)
+            kh_LateralityIndex (FreqConfig.Gamma, 'Stats_allRois_left', 'Stats_allRois_right', Path)
+            kh_LateralityIndex (FreqConfig.Gamma, 'Stats_Broca_left', 'Stats_Broca_right', Path)                    
+            kh_LateralityIndex (FreqConfig.Gamma, 'Stats_Wernicke_left', 'Stats_Wernicke_right', Path)        
+            kh_LateralityIndex (FreqConfig.Gamma, 'Stats_TemporalLobe_left', 'Stats_TemporalLobe_right', Path)
+
 
       
 end
 
-%% 
+%% evtl. in separate Datei packen
 
 function [Config, PathExt] = SelectTimeWindowOfInterest()
 

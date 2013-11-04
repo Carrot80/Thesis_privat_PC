@@ -20,7 +20,7 @@ function  kh_PlotStatistics( ConfigFile, PathStatsFile, StatsFileName, Path )
         cfg_plot.anaparameter    = 'anatomy';
         cfg_plot.maskparameter   = 'mask'; 
         cfg_plot.coordsys        = 'spm';
-        ft_sourceplot(cfg_plot, StatsFile_int);
+        ft_sourceplot_invisible(cfg_plot, StatsFile_int);
         title(StatsFile.name);
         sourceplot               = strcat(Path.Statistics, '\', ConfigFile.name, '\', StatsFile.name);
         print('-dpng', sourceplot);
@@ -40,11 +40,13 @@ function  kh_PlotStatistics( ConfigFile, PathStatsFile, StatsFileName, Path )
 %         cfg_plot.opacitylim      = [-2.5 2.5];  % [min max]; 'zeromax' (values from zero to max will be plotted), 'minzero' , 'maxabs' ;
 %         cfg_plot.funcolorlim     = [-2.5 2.5];
         cfg_plot.coordsys        = 'spm';
-        ft_sourceplot(cfg_plot_sign, SignStatsFile_int);
+        ft_sourceplot_invisible(cfg_plot_sign, SignStatsFile_int);
         
         title(StatsFile.name);
         sourceplot_sign          = strcat(Path.Statistics, '\',  ConfigFile.name, '\', StatsFile.name, '_', 'sign');
         print('-dpng', sourceplot_sign);
     
+        
+        
 end  
     
