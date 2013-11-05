@@ -10,7 +10,7 @@ function kh_SourceAnalysis ( ConfigFile, Data, MRI, Volume, Path )
 
 
     % Check, if data is already avaliable
-     FileName = strcat(DirFreqName, '\', 'trial_sourcePre', '_', ConfigFile.string, '.mat');
+     FileName = strcat(DirFreqName, '\', 'trial_sourcePost', '_', ConfigFile.string, '.mat');
          
         if exist( FileName, 'file' )
             return;
@@ -105,21 +105,7 @@ function kh_SourceAnalysis ( ConfigFile, Data, MRI, Volume, Path )
     sourceDiffInt  = ft_sourceinterpolate(cfg_int, sourceDiff, MRI_realignment.mri_realign_resliced);
 
     % Now plot the power ratios: 
-
-    cfg_ortho                = [];
-    cfg_ortho.method         = 'ortho';
-    cfg_ortho.interactive    = 'yes';
-    cfg_ortho.funparameter   = 'avg.pow';
-    cfg_ortho.maskparameter  = cfg_ortho.funparameter;
-%     cfg_ortho.funcolorlim    = [-0.6 0.6];
-%     cfg_ortho.opacitylim     = [-0.6 0.6];  
-    cfg_ortho.opacitymap     = 'rampup';  
-    ft_sourceplot(cfg_ortho, sourceDiffInt);
-    plot_ortho               = strcat( Path.SourceAnalysis, '\', ConfigFile.name, '\', 'avg_ortho', '_', ConfigFile.string );
-    print( plot_ortho );
-
-
-    figure
+ 
     cfg_slice               = [];
     cfg_slice.method        = 'slice';
     cfg_slice.funparameter  = 'avg.pow';
@@ -127,10 +113,25 @@ function kh_SourceAnalysis ( ConfigFile, Data, MRI, Volume, Path )
 %     cfg_slice.funcolorlim   = [-1.2 1.2];
 %     cfg_slice.opacitylim    = [-1.2 1.2]; 
     cfg_slice.opacitymap    = 'rampup';  
-    ft_sourceplot(cfg_slice, sourceDiffInt);
+    ft_sourceplot_invisible(cfg_slice, sourceDiffInt);
 
     plot_slice              = strcat( Path.SourceAnalysis, '\', ConfigFile.name, '\', 'avg_slice', '_', ConfigFile.string );
     print( '-dpng', plot_slice );
+
+    
+    cfg_ortho                = [];
+    cfg_ortho.method         = 'ortho';
+    cfg_ortho.interactive    = 'no';
+    cfg_ortho.funparameter   = 'avg.pow';
+    cfg_ortho.maskparameter  = cfg_ortho.funparameter;
+%     cfg_ortho.funcolorlim    = [-0.6 0.6];
+%     cfg_ortho.opacitylim     = [-0.6 0.6];  
+    cfg_ortho.opacitymap     = 'rampup';  
+    ft_sourceplot_invisible(cfg_ortho, sourceDiffInt);
+    
+    plot_ortho               = strcat( Path.SourceAnalysis, '\', ConfigFile.name, '\', 'avg_ortho', '_', ConfigFile.string );
+    saveas(gcf,plot_ortho,'fig') 
+    
 
 
 end

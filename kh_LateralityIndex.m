@@ -38,7 +38,6 @@ function [LI] = kh_LateralityIndex (ConfigFile, Stats_left, Stats_right, Path)
             
         end
         
-   
         fn_LI = strcat(Path.LI, '\', ConfigFile.name, '\', 'LI', '_', NameROI );
         
         if ~exist ( fn_LI, 'file')

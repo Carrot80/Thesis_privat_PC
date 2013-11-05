@@ -1,0 +1,4 @@
+to do:
+
+- Frequenzanalyse erweitern, so dass Spectrum zu sehen ist
+- 

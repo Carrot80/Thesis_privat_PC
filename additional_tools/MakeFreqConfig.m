@@ -50,5 +50,16 @@ function [FreqConfig] = MakeFreqConfig()
     FreqConfig.Gamma.taper        = 'hanning';  
     FreqConfig.Gamma.output       = 'powandcsd'; 
 
+    FreqConfig.LowGamma.lower         = 20;
+    FreqConfig.LowGamma.upper         = 35;
+    FreqConfig.LowGamma.string        = '20_35Hz';
+    FreqConfig.LowGamma.name          = 'LowGamma';
+%     FreqConfig.LowGamma.foi           = 35;
+    FreqConfig.LowGamma.foilim        = [20 35];
+    FreqConfig.LowGamma.tapsmofrq     = [];  %
+    FreqConfig.LowGamma.frequency     = 28;
+    FreqConfig.LowGamma.method       = 'mtmfft'; 
+    FreqConfig.LowGamma.taper        = 'hanning';  
+    FreqConfig.LowGamma.output       = 'powandcsd'; 
 
 end

@@ -1,27 +1,90 @@
-%Fieldtrip STefan Illek:
 
-cd C:\MEG\Daten\Kontrollen\Illek_Stefan\zzz_si\la_seMEG40\1INYC4~U\1\mitRauschreduktion
 
-% evtl. zu Beginn auf 500 Hz runtersamplen
-% clean Heartbeat:
-
-    fileName='C:\MEG\Daten\Kontrollen\Illek_Stefan\zzz_si\la_seMEG40\1INYC4~U\1\mitRauschreduktion\c,rfhp0.1Hz'
-    p = pdf4D(fileName);
+function ForAllPat ()
     
-    chi = channel_index(p, 'meg');
-    data = read_data_block(p, [], chi);
-    tMEG = (0:size(data,2)-1)/1017.25;
-    figure(2)
+    PatientFolder = 'C:\Kirsten\DatenDoktorarbeit\Patienten\'
+    PatientList = dir( PatientFolder );
+    VolunteerFolder = 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\';
+    VolunteerList = dir( VolunteerFolder );
+    
+    for i = 1 : size (VolunteerList)
+        if ( 0 == strcmp( VolunteerList(i,1).name, '.') && 0 == strcmp( VolunteerList(i,1).name, '..'))
+            analysis2( strcat(VolunteerFolder, VolunteerList(i,1).name), VolunteerList(i,1).name  ) ;
+        end
+    end
+end
+
+%%
+
+function [Path, PatientName] = analysis2  ( PatientPath, PatientName)
+
+ % Reject all other but zzz_sc_Strobl
+        if ( 0 == strcmp (PatientPath, 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_sf_Fakhry'))
+            return;
+        end
+        
+        [Config, PathExt] = SelectTimeWindowOfInterest(); % evtl. in FreqConfig integrieren
+        
+        Path                     = [];
+        Path.DataInput           = strcat ( PatientPath, '\MEG\01_Input_noise_reduced')                 ;
+        Path.Preprocessing       = strcat ( PatientPath, '\MEG\02_PreProcessing')                       ;
+        Path.DataTimeOfInterest  = strcat ( PatientPath, '\MEG\03_DataTimeOfInterest', '\', PathExt)    ;
+        Path.Volume              = strcat ( PatientPath, '\MEG\04_Volume')                              ;
+        Path.FreqAnalysis        = strcat ( PatientPath, '\MEG\05_FreqAnalysis', '\', PathExt)          ;
+        Path.SourceAnalysis      = strcat ( PatientPath, '\MEG\06_SourceAnalysis', '\', PathExt)        ;
+        Path.Interpolation       = strcat ( PatientPath, '\MEG\07_Interpolation', '\', PathExt)         ;  
+        Path.Statistics          = strcat ( PatientPath, '\MEG\08_Statistics', '\', PathExt)            ;
+        Path.LI                  = strcat ( PatientPath, '\MEG\09_LateralityIndices', '\', PathExt)     ;
+        
+        Path.TemplateMRI         = 'C:\Kirsten\DatenDoktorarbeit\Alle\TemplateMRI';
+        Path.MRI                 = strcat ( PatientPath, '\MRI');
+        
+        Path_cellarray = struct2cell(Path);
+        for i=1:length(Path_cellarray)
+            mkdirIfNecessary( char(Path_cellarray(i) ));
+        end
+  
+        PreProcessing (Path, PatientName)
+
+end
+  
+
+%%
+    function PreProcessing (Path, PatientName)    
+        
+% clean heartbeat:
+
+    fileName        = strcat ( Path.DataInput, '\',  'n_c,rfhp0.1Hz')  ;
+    p               = pdf4D(fileName) ;
+    
+    % look at the mean MEG:
+    chi             = channel_index( p, {'MEG'} ) ;
+    data            = read_data_block( p, [], chi ) ;
+    samplingRate    = get( p,'dr' ) ;
+    tMEG            = ( 0:size(data,2)-1 )/samplingRate ;
     plot(tMEG,mean(data))
- 
-    cleanCoefs = createCleanFile(p, fileName,'byLF',0, 'HeartBeat',[])
-    tList = listErrorInHB(cleanCoefs)
-    save cleanCoefs cleanCoefs % auch noch tList speichern
+    PathPlot        = strcat(Path.Preprocessing, '\', 'MeanMEG') ;
+    NameTitle       = strcat ('Mean MEG', {' '}, '-', {' '}, PatientName)
+    title (NameTitle) ;
+    print('-dpng', PathPlot) ;
+    
+  
+%     cleanCoefs = createCleanFile(p, fileName, 'byLF',0, 'HeartBeat',[]) ;
+    cleanCoefs      = createCleanFile(p, fileName, 'HeartBeat',[]) ; 
+    PathPlot        = strcat(Path.Preprocessing, '\', 'MeanMEG') ;
+    print ('-dpng', PathPlot) ;
+    
+    tList = listErrorInHB(cleanCoefs) ;
+    
+    FileName_cleanCoefs = strcat (Path.Preprocessing, 'cleanCoefs') ;
+    save (FileName_cleanCoefs, 'cleanCoefs', 'tList') 
+    
+    % auch noch tList speichern
 
      
-    cleanpdf=pdf4D('hb_c,rfhp0.1Hz');
-    data2=read_data_block(cleanpdf, [],chi);
-    tMEGClean = (0:size(data2,2)-1)/1017.25;
+    cleanpdf=pdf4D('hb_c,rfhp0.1Hz') ;
+    data2=read_data_block(cleanpdf, [],chi) ;
+    tMEGClean = (0:size(data2,2)-1)/1017.25 ;
     
     figure
     plot(tMEG,mean(data),'b')
@@ -116,7 +179,6 @@ data_HB_pb1_95nojumps = ft_rejectartifact(cfg,data_HB_bp1_95);
 %         the call to "ft_redefinetrial" took 1 seconds
 %         the call to "ft_rejectartifact" took 1 seconds
 
---    
 
 
 cfg = [];
@@ -297,5 +359,5 @@ CleanData = data_HB_1_95_nojumps_sum_pca_rejvis
 
 save CleanData data_HB_1_95_nojumps_sum_pca_rejvis data_HB_1_95_nojumps_sum_pca
 
-
+end
 

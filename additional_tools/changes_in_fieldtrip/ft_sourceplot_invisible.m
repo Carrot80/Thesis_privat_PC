@@ -302,8 +302,8 @@ elseif  isfield(data, 'coordsys') &&  isempty(cfg.coordsys)
 end
 
 % select the functional and the mask parameter
-cfg.funparameter  = kh_parameterselection(cfg.funparameter, data);
-cfg.maskparameter = kh_parameterselection(cfg.maskparameter, data);
+cfg.funparameter  = parameterselection(cfg.funparameter, data);
+cfg.maskparameter = parameterselection(cfg.maskparameter, data);
 % only a single parameter should be selected
 try, cfg.funparameter  = cfg.funparameter{1};  end
 try, cfg.maskparameter = cfg.maskparameter{1}; end

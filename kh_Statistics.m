@@ -89,13 +89,7 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             cfg_stats.hemisphere          = 'left' ; %   'left' 'right', 'both', 'combined', specifying this is required when averaging over regions 
             Stats_allRois_left            = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_allRois_left.name       = 'Stats_allRois_left';
-            save( fn_Stats_allROIs_left, 'Stats_allRois_left' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_allROIs_left, 'Stats_allRois_left', Path)
-            
-     else
-         
-         kh_PlotStatistics (ConfigFile, fn_Stats_allROIs_left, 'Stats_allRois_left', Path)
-         
+            save( fn_Stats_allROIs_left, 'Stats_allRois_left' )     
      end
      
      if ~exist( fn_Stats_allROIs_right, 'file' ) 
@@ -103,12 +97,7 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             cfg_stats.hemisphere          = 'right' ; 
             Stats_allRois_right           = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_allRois_right.name      = 'Stats_allRois_right';
-            save( fn_Stats_allROIs_right, 'Stats_allRois_right' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_allROIs_right, 'Stats_allRois_right', Path)
-            
-     else
-         kh_PlotStatistics (ConfigFile, fn_Stats_allROIs_right, 'Stats_allRois_right', Path)
-         
+            save( fn_Stats_allROIs_right, 'Stats_allRois_right' )      
      end       
             
      if ~exist( fn_Stats_allROIs_both_hem, 'file' ) 
@@ -156,11 +145,7 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Broca_left              = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Broca_left.name         = 'Stats_Broca_left';
             save( fn_Stats_Broca_left, 'Stats_Broca_left' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_left, 'Stats_Broca_left', Path)
-            
-        else
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_left, 'Stats_Broca_left', Path)
-            
+
         end
         
         if ~exist( fn_Stats_Broca_right, 'file' ) 
@@ -169,10 +154,6 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Broca_right             = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Broca_right.name        = 'Stats_Broca_right';
             save( fn_Stats_Broca_right, 'Stats_Broca_right' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_right, 'Stats_Broca_right', Path)
-            
-        else
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_right, 'Stats_Broca_right', Path)
         end
         
         if ~exist( fn_Stats_Broca_both_hem, 'file' ) 
@@ -219,12 +200,7 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             cfg_stats.hemisphere          = 'left' ; %   'left' 'right', 'both', 'combined', specifying this is required when averaging over regions 
             Stats_Wernicke_left           = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Wernicke_left.name      = 'Stats_Wernicke_left';
-            save( fn_Stats_Wernicke_left, 'Stats_Wernicke_left' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_left, 'Stats_Wernicke_left', Path)
-            
-         else
-             kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_left, 'Stats_Wernicke_left', Path)
-            
+            save( fn_Stats_Wernicke_left, 'Stats_Wernicke_left' )            
          end
          
          if ~exist( fn_Stats_Wernicke_right, 'file' )  
@@ -233,10 +209,6 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Wernicke_right          = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Wernicke_right.name     = 'Stats_Wernicke_right';
             save( fn_Stats_Wernicke_right, 'Stats_Wernicke_right' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_right, 'Stats_Wernicke_right', Path)
-            
-         else
-             kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_right, 'Stats_Wernicke_right', Path)
               
          end
          
@@ -282,12 +254,7 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
              cfg_stats.hemisphere          = 'left' ; %   'left' 'right', 'both', 'combined', specifying this is required when averaging over regions 
              Stats_TemporalLobe_left       = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
              Stats_TemporalLobe_left.name  = 'Stats_TemporalLobe_left';
-             save( fn_Stats_TemporalLobe_left, 'Stats_TemporalLobe_left' )
-             kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_left, 'Stats_TemporalLobe_left', Path)
-             
-         else
-             kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_left, 'Stats_TemporalLobe_left', Path)
-             
+             save( fn_Stats_TemporalLobe_left, 'Stats_TemporalLobe_left' )          
          end
          
          if ~exist( fn_Stats_TemporalLobe_right, 'file' )   
@@ -295,13 +262,9 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
              cfg_stats.hemisphere          = 'right' ; 
              Stats_TemporalLobe_right      = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
              Stats_TemporalLobe_right.name = 'Stats_TemporalLobe_right';
-             save( fn_Stats_TemporalLobe_right, 'Stats_TemporalLobe_right' )
-             kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_right, 'Stats_TemporalLobe_right', Path)
-             
-         else
-             kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_right, 'Stats_TemporalLobe_right', Path)
-             
+             save( fn_Stats_TemporalLobe_right, 'Stats_TemporalLobe_right' )         
          end
+         
          
          if ~exist( fn_Stats_TemporalLobe_both_hem, 'file' )  
              
