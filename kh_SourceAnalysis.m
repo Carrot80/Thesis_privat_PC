@@ -114,7 +114,7 @@ function kh_SourceAnalysis ( ConfigFile, Data, MRI, Volume, Path )
 %     cfg_slice.opacitylim    = [-1.2 1.2]; 
     cfg_slice.opacitymap    = 'rampup';  
     ft_sourceplot_invisible(cfg_slice, sourceDiffInt);
-
+    title ( ConfigFile.name )
     plot_slice              = strcat( Path.SourceAnalysis, '\', ConfigFile.name, '\', 'avg_slice', '_', ConfigFile.string );
     print( '-dpng', plot_slice );
 
@@ -128,6 +128,7 @@ function kh_SourceAnalysis ( ConfigFile, Data, MRI, Volume, Path )
 %     cfg_ortho.opacitylim     = [-0.6 0.6];  
     cfg_ortho.opacitymap     = 'rampup';  
     ft_sourceplot_invisible(cfg_ortho, sourceDiffInt);
+    title ( ConfigFile.name )
     
     plot_ortho               = strcat( Path.SourceAnalysis, '\', ConfigFile.name, '\', 'avg_ortho', '_', ConfigFile.string );
     saveas(gcf,plot_ortho,'fig') 

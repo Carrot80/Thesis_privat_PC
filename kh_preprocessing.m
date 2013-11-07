@@ -19,7 +19,7 @@ end
 function [Path, PatientName] = analysis2  ( PatientPath, PatientName)
 
  % Reject all other but zzz_sc_Strobl
-        if ( 0 == strcmp (PatientPath, 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_sf_Fakhry'))
+        if ( 0 == strcmp (PatientPath, 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_ka_Kellermann'))
             return;
         end
         
@@ -45,319 +45,344 @@ function [Path, PatientName] = analysis2  ( PatientPath, PatientName)
         end
   
         PreProcessing (Path, PatientName)
+        kh_ComponentAnalysisFull (Path)
+        kh_ComponentAnalysisPart (Path)
+        kh_RejectComponent (Path)
 
 end
   
 
 %%
     function PreProcessing (Path, PatientName)    
-        
-% clean heartbeat:
+    
+%     CheckDataQuality_BIU (Path)
 
-    fileName        = strcat ( Path.DataInput, '\',  'n_c,rfhp0.1Hz')  ;
-    p               = pdf4D(fileName) ;
+
+%% 
+
+    FilePreProc = strcat (Path.Preprocessing, '\', 'Data_bp1_95_nojumps_vis_rej.mat') ;
     
-    % look at the mean MEG:
-    chi             = channel_index( p, {'MEG'} ) ;
-    data            = read_data_block( p, [], chi ) ;
-    samplingRate    = get( p,'dr' ) ;
-    tMEG            = ( 0:size(data,2)-1 )/samplingRate ;
-    plot(tMEG,mean(data))
-    PathPlot        = strcat(Path.Preprocessing, '\', 'MeanMEG') ;
-    NameTitle       = strcat ('Mean MEG', {' '}, '-', {' '}, PatientName)
-    title (NameTitle) ;
-    print('-dpng', PathPlot) ;
+    if exist (FilePreProc, 'file')
+        return
+    end
     
+    fileName  = strcat ( Path.DataInput, '\',  'n_c,rfhp0.1Hz')  ;
+    HeartBeatCleaned = strcat( Path.Preprocessing, 'hb_n_c,rfhp0.1Hz') ;
+    
+    
+    if exist('hb_n_c,rfhp0.1Hz', 'file')
+       fileName = HeartBeatCleaned
+    end
+    
+    % define trials:
+    hdr                     = ft_read_header(fileName) ;
+    cfg_preproc.dataset     = fileName ;
+    cfg_preproc.channel     = 'MEG' ;
+    [Data]                  = ft_definetrial(cfg_preproc) ;
+    
+    % preprocessing
+    cfg_preproc.channel     = 'MEG' ;
+    cfg_preproc.continuous  = 'yes' ;
+    cfg_preproc.bpfilter    = 'yes' ;
+    cfg_preproc.bpfreq      = [1 95] ;
+    cfg_preproc.bsfilter    = 'yes' ;
+    cfg_preproc.bsfreq      = [50 100] ;
+    Data_bp1_95             = ft_preprocessing(Data) ;
+    PathData = strcat (Path.Preprocessing, '\', 'Data_bp1_95') ;
+    save (PathData, 'Data_bp1_95') ;
   
-%     cleanCoefs = createCleanFile(p, fileName, 'byLF',0, 'HeartBeat',[]) ;
-    cleanCoefs      = createCleanFile(p, fileName, 'HeartBeat',[]) ; 
-    PathPlot        = strcat(Path.Preprocessing, '\', 'MeanMEG') ;
-    print ('-dpng', PathPlot) ;
+    %% Jumps in data:
     
-    tList = listErrorInHB(cleanCoefs) ;
+    % It is very important to remove all jump and muscle artifacts before running your ICA, 
+    % otherwise they may change the results you get. To remove artifacts on the example dataset, use:
+    % jump:
+ 
+    % channel selection, cutoff and padding:
+    cfg_jump.trl        = Data.trl;
+    cfg_jump.datafile   = fileName;
+    cfg_jump.headerfile = fileName;
+    cfg_jump.continuous = 'yes'; 
+    cfg_jump.artfctdef.zvalue.channel    = 'MEG';
+    cfg_jump.artfctdef.zvalue.cutoff     = 20;
+    cfg_jump.artfctdef.zvalue.trlpadding = 0;
+    cfg_jump.artfctdef.zvalue.artpadding = 0;
+    cfg_jump.artfctdef.zvalue.fltpadding = 0;
+ 
+    % algorithmic parameters
+    cfg_jump.artfctdef.zvalue.cumulative    = 'yes';
+    cfg_jump.artfctdef.zvalue.medianfilter  = 'yes';
+    cfg_jump.artfctdef.zvalue.medianfiltord = 9 ;
+    cfg_jump.artfctdef.zvalue.absdiff       = 'yes';
+ 
+    % make the process interactive
+    cfg_jump.artfctdef.zvalue.interactive = 'no';
+ 
+    [cfg_jump_output, artifact_jump]      = ft_artifact_zvalue(cfg_jump);
+    PathJumps                             = strcat (Path.Preprocessing, '\', 'Jumps_RawData') ;
+    save (PathJumps, 'artifact_jump', 'cfg_jump_output') ;
     
-    FileName_cleanCoefs = strcat (Path.Preprocessing, 'cleanCoefs') ;
-    save (FileName_cleanCoefs, 'cleanCoefs', 'tList') 
-    
-    % auch noch tList speichern
+    cfg_jump                         = [] ; 
+    cfg_jump.artfctdef.reject        = 'complete'; % use 'partial' if you want to do partial artifact rejection
+    cfg_jump.artfctdef.jump.artifact = artifact_jump ;
+    %cfg.artfctdef.muscle.artifact = artifact_muscle;
+    Data_bp1_95nojumps = ft_rejectartifact(cfg_jump, Data_bp1_95) ;
+    PathDataNoJumps                  = strcat (Path.Preprocessing, '\', 'Data_bp1_95nojumps') ;
+    save (PathDataNoJumps, 'Data_bp1_95nojumps') ;
 
-     
-    cleanpdf=pdf4D('hb_c,rfhp0.1Hz') ;
-    data2=read_data_block(cleanpdf, [],chi) ;
-    tMEGClean = (0:size(data2,2)-1)/1017.25 ;
+
+    %% reject manually 
+
+    %rejectvisual summary
+    cfg         = [];
+    cfg.method  = 'summary';
+    cfg.channel = 'MEG';
+    cfg.alim    = 1e-12;
+    % reject all bad trials/channels manually :
+    [Data_bp1_95_nojumps_vis_rej,trlsel,chansel] = ft_rejectvisual(cfg, Data_bp1_95nojumps);
     
+    RemovedChannels = find (chansel == 0) ;
+%     RemovedChannels_string = num2cell (RemovedChannels)
+% %     cell2str
+%     char(RemovedChannels)
+%     RemovedChannels_strcat = strcat ('A', RemovedChannels_string)
+%     RemovedTrials = find (trlsel == 0 ) ;
+    
+%   RemovedChannels = num2cell( RemovedChannels) ;
+    Data_bp1_95_nojumps_vis_rej.trlsel          = trlsel ;
+    Data_bp1_95_nojumps_vis_rej.chansel         = chansel ;
+    Data_bp1_95_nojumps_vis_rej.RemovedChannels = RemovedChannels ;
+    Data_bp1_95_nojumps_vis_rej.RemovedTrials   = RemovedTrials ;
+
+    PathData = strcat (Path.Preprocessing, '\', 'Data_bp1_95_nojumps_vis_rej') ;
+    save (PathData, 'Data_bp1_95_nojumps_vis_rej')
+
+    end
+    
+
+%% Component analysis:
+
+function kh_ComponentAnalysisFull (Path)
+
+    FileCompFull = strcat (Path.Preprocessing, '\', 'comp_ica.mat') ;
+    
+    if exist (FileCompFull, 'file')
+        return
+    end
+
+    FilePreProc = strcat (Path.Preprocessing, '\', 'Data_bp1_95_nojumps_vis_rej') ;
+    load (FilePreProc)
+
+    
+    %% downsample data , otherwise ICA decomposition will take too long
+    cfg            = [] ;
+    cfg.resamplefs = 300 ;
+    cfg.detrend    = 'no' ;
+    data_resampled = ft_resampledata(cfg, Data_bp1_95_nojumps_vis_rej) ;
+ 
+    %% perform the independent component analysis (i.e., decompose the data)
+    cfg         = [];
+    cfg.method  = 'runica'; % this is the default and uses the implementation from EEGLAB
+    cfg.channel = {'MEG'};
+    comp_ica = ft_componentanalysis(cfg, data_resampled)
+
+    FileICA = strcat (Path.Preprocessing, '\', 'comp_ica') ;
+    save (FileICA, 'comp_ica')
+
+    % prepare the layout
+    cfg_lay         = [];
+    cfg_lay.grad    = comp_ica.grad;
+    lay             = ft_prepare_layout(cfg_lay);
+
+    % plot the components for visual inspection
     figure
-    plot(tMEG,mean(data),'b')
-    hold on
-    plot(tMEGClean,mean(data2),'r')
+    cfg             = [];
+    cfg.component   = [1:40];       % specify the component(s) that should be plotted
+    cfg.layout      = lay; % specify the layout file that should be used for plotting
+    cfg.comment     = 'no';
+    ft_topoplotIC(cfg, comp_ica)
+    title ('Components ICA')
+    PathTopoplotICA = strcat (Path.Preprocessing, '\', 'comp_ica') ;
+    saveas (gca, PathTopoplotICA, 'fig')
     
-    % find clean periods with no high-frequency-noise:
-    % finding good periods for every channels. based on fft run with a % window of 2s sliding in steps of 0.5s. 
-    % gives for every channel collumns% of beginning and end times of clean periods.
-    cleanPeriodsAllChans=findCleanPeriods(fileName);
+    %% perform PCA :
+    cfg         = [];
+    cfg.method  = 'pca'; % this is the default and uses the implementation from EEGLAB
+    cfg.channel = {'MEG'};
+    comp_pca = ft_componentanalysis(cfg, data_resampled)
     
-    % deciding which time points are realy clean. strictest is when for a given% time point there 
-    % is no bad channel. for this the third argument% (chanNumThr) has to be 1. the default is 20, 
-    % that is if 20 channels or more are% noisy at a sertain a time point it is considered as bad.
-    cleanPeriods=sumGoodPeriods(fileName,cleanPeriodsAllChans,[]);
+    FilePCA = strcat (Path.Preprocessing, '\', 'comp_pca') ;
+    save (FileICA, 'comp_pca')
     
-   % MEG von ILLEK ist sauber
+    % prepare the layout % debuggen !!
+    cfg_lay_pca         = [];
+    cfg_lay_pca.grad    = comp_pca.grad;
+    lay_pca             = ft_prepare_layout(cfg_lay_pca);
     
-%   Calculate the power spectrum:
-   
-[data1PSD, freq] = allSpectra(data,1017.25,1,'FFT');
-[data2PSD, freq] = allSpectra(data2,1017.25,1,'FFT');
-figure;plot (freq(1,1:120),data1PSD(1,1:120),'r')
-hold on;
-plot (freq(1,1:120),data2PSD(1,1:120),'b')
-xlabel ('Frequency Hz');
-ylabel('SQRT(PSD), T/sqrt(Hz)');
-title('Mean PSD for A245');
-
-cfg         = []
-cfg.dataset = 'hb_c,rfhp0.1Hz';
-ft_qualitycheck(cfg) 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % plot the components for visual inspection
+    figure
+    cfg             = [];
+    cfg.component   = [1:40];       % specify the component(s) that should be plotted
+    cfg.layout      = lay_pca; % specify the layout file that should be used for plotting
+    cfg.comment     = 'no';
+    ft_topoplotIC(cfg, comp_pca)
+    title ('Components PCA')
     
-    % Fieldtrip: define trial and preprocessing
+    PathTopoplotPCA = strcat (Path.Preprocessing, '\', 'comp_pca') ;
+    saveas (gca, PathTopoplotPCA, 'fig')
+
+    %view the time course of the component: stürzt ab, evtl. zu große
+    %Datenmenge (evtl. debuggen!!
+    figure(2)
+    cfg           = [] ;
+    cfg.layout    = lay_pca ; % specify the layout file that should be used for plotting
+    cfg.channel = comp_pca.label{1:5}; % components to be plotted
+    ft_databrowser(cfg, comp_pca)
+
     
-        hdr = ft_read_header('C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_si_Illek\MEG\01_Input_noise_reduced\hb_c,rfhp0.1Hz');
-        cfg.dataset='C:\MEG\Daten\Kontrollen\Illek_Stefan\zzz_si\la_seMEG40\1INYC4~U\1\mitRauschreduktion\hb_c,rfhp0.1Hz';
-        cfg.channel = 'TRIGGER';
-        [cfg] = ft_definetrial(cfg)
-    
-        % preprocessing
-            cfg.channel='MEG';
-            cfg.continuous='yes';
-            cfg.bpfilter='yes'
-            cfg.bpfreq=[1 95]
-            cfg.bsfilter='yes'
-            cfg.bsfreq=[50 100]
-            data_HB_bp1_95=ft_preprocessing(cfg);
-           
-% It is very important to remove all jump and muscle artifacts before running your ICA, 
-% otherwise they may change the results you get. To remove artifacts on the example dataset, use:
-% jump:
- 
-% channel selection, cutoff and padding
-
-cfg.trl        = trl;
-cfg.datafile   = 'hb_c,rfhp0.1Hz';
-cfg.headerfile = 'hb_c,rfhp0.1Hz';
-cfg.continuous = 'yes'; 
-cfg.artfctdef.zvalue.channel    = 'MEG';
-cfg.artfctdef.zvalue.cutoff     = 20;
-cfg.artfctdef.zvalue.trlpadding = 0;
-cfg.artfctdef.zvalue.artpadding = 0;
-cfg.artfctdef.zvalue.fltpadding = 0;
- 
-% algorithmic parameters
-cfg.artfctdef.zvalue.cumulative    = 'yes';
-cfg.artfctdef.zvalue.medianfilter  = 'yes';
-cfg.artfctdef.zvalue.medianfiltord = 9;
-cfg.artfctdef.zvalue.absdiff       = 'yes';
- 
-% make the process interactive
-cfg.artfctdef.zvalue.interactive = 'yes';
- 
-[cfg, artifact_jump] = ft_artifact_zvalue(cfg);
-
-cfg=[]; 
-cfg.artfctdef.reject = 'complete'; % use 'partial' if you want to do partial artifact rejection
-cfg.artfctdef.jump.artifact = artifact_jump;
-%cfg.artfctdef.muscle.artifact = artifact_muscle;
-data_HB_pb1_95nojumps = ft_rejectartifact(cfg,data_HB_bp1_95);
-
-%         data_HB_pb1_95nojumps = ft_rejectartifact(cfg,data_HB_bp1_95);
-%         detected  14 jump artifacts
-%         rejected    7 trials completely
-%         rejected    0 trials partially
-%         resulting 179 trials
-%         the input is raw data with 248 channels and 186 trials
-%         selecting 0 trials
-%         the call to "ft_redefinetrial" took 1 seconds
-%         the call to "ft_rejectartifact" took 1 seconds
+end
 
 
-
-cfg = [];
-cfg.channel = 'MEG';
-% open the browser and page through the trials
-artf=ft_databrowser([],data_HB_pb1_95nojumps);   
 
 %% schauen, dass man sich Rohdaten anschauen kann, um Blinzelartefakte etc zu erkennen
 
-findBadChans('hb_c,rfhp0.1Hz'); % geht nur ab Beginn des Datensatzes bis beliebig
-tracePlot_BIU(1700,1800,'hb_c,rfhp0.1Hz'); % für variable Zeiten
+function kh_ComponentAnalysisPart (Path)
+    
+    fileName  = strcat ( Path.DataInput, '\',  'n_c,rfhp0.1Hz')  ;
+    FilePreProc = strcat (Path.Preprocessing, '\', 'Data_bp1_95_nojumps_vis_rej') ;
+    load (FilePreProc)
+    
+    findBadChans(fileName); % geht nur ab Beginn des Datensatzes bis beliebig
+    tracePlot_BIU(1,10, fileName); % für variable Zeiten
 
 
-%% reject manually
+%%  BIU:
 
-%rejectvisual summary
-cfg=[];
-cfg.method='summary';
-cfg.channel='MEG';
-cfg.alim=1e-12;
-data_HB_pb1_95nojumps_sum=ft_rejectvisual(cfg, data_HB_pb1_95nojumps); % reject all bad trials/channels manually
-save fieldtrip_cleaning
+    startt                  = 1 ;
+    endt                    = 100 ;
+    cfg                     = [] ;
+    cfg.dataset             = fileName ;
+    cfg.trialdef.beginning  = startt ;
+    cfg.trialdef.end        = endt ;
+    cfg.trialfun            = 'trialfun_raw' ; % the other usefull trialfun we have are trialfun_beg and trialfun_BIU
+    cfg1                    = ft_definetrial(cfg) ;
 
-%% Componentenanalyse:
+    cfg1.channel            = Data_bp1_95_nojumps_vis_rej.label ;
+    cfg1.continuous         = 'yes' ;
+    cfg1.bpfilter           = 'yes' ;
+    cfg1.bpfreq             = [1 95] ;
+    cfg1.bsfilter           = 'yes' ;
+    cfg1.bsfreq             = [50 100] ;
+    cfg1.demean             = 'no' ; % old version was: cfg1.blc='yes';
+    MOG                     = ft_preprocessing(cfg1);
+    
+    % lets view the raw data for one channel
+    cfgb                    = [] ;
+    cfgb.layout             = lay ;
+    cfgb.continuous         = 'yes' ;
+    cfgb.event.type         = '' ;
+    cfgb.event.sample       = 1 ;
+    cfgb.blocksize          = 3 ;
+    cfgb.channel            = 'A245';
+    comppic                 = ft_databrowser(cfgb, MOG) ;
 
-% evtl. herausfinden, wie man aus den Daten jumps entfernen kann über die
-% tList
-% versuchen, fieldtrip-daten ähnlich zu plotten wie mean(MEG)
+    % ICA
+    cfgc                = [] ;
+    cfgc.method         = 'runica';
+    comp_ICA_100s       = ft_componentanalysis(cfgc, MOG);
+    File_comp_ICA_100s  = strcat (Path.Preprocessing, '\', 'comp_ICA_100s') ;
+    save (File_comp_ICA_100s, 'comp_ICA_100s')
 
-%     tMEG = (0:size(data,2)-1)/1017.25;
-%     figure(2)
-%     plot(tMEG,mean(data))
+    % PCA zum Vergleich
+    cfgc                = [] ;
+    cfgc.method         = 'pca';
+    comp_PCA_100s      = ft_componentanalysis(cfgc, MOG);
 
-data_no_artifacts = data_HB_pb1_95nojumps_sum; %save the original data for later use
-cfg            = [];
-cfg.resamplefs = 300;
-cfg.detrend    = 'no';
-dummy          = ft_resampledata(cfg, data_no_artifacts);
-save dummy dummy
+    cfg_lay         = [];
+    cfg_lay.grad    = comp_PCA_100s.grad;
+    lay             = ft_prepare_layout(cfg_lay);
+    
+    % see the components and find the HB and MOG artifact
+    % remember the numbers of the bad components and close the data browser
 
-% perform the independent component analysis (i.e., decompose the data)
-cfg        = [];
-cfg.method = 'runica'; % this is the default and uses the implementation from EEGLAB
-cfg.channel = {'MEG'};
-comp = ft_componentanalysis(cfg, dummy)
-save comp comp
+    
+    % plot the components for visual inspection
+    figure
+    cfg3                = [];
+    cfg3.component      = [1:10];       % specify the component(s) that should be plotted
+    cfg3.layout         = lay; % specify the layout file that should be used for plotting
+    cfg3.comment        = 'no';
+    ft_topoplotIC(cfg3, comp_PCA_100s)
 
-% prepare the layout
-cfg = [];
-cfg.grad = dummy.grad;
-lay = ft_prepare_layout(cfg);
+    % http://fieldtrip.fcdonders.nl/tutorial/layout:
+    
+    cfgb                = [];
+    cfgb.layout         = lay;
+    %cfgb.channel = {comp.label{1:5}};
+    cfg.component       = [1:5];
+    cfgb.continuous     = 'yes';
+    cfgb.event.type     = '';
+    cfgb.event.sample   = 1;
+    cfgb.blocksize      = 3;
+    comppic             = ft_databrowser(cfgb,compMOG_pca);
 
+end
 
-% plot the components for visual inspection
-figure
-cfg = [];
-cfg.component = [1:40];       % specify the component(s) that should be plotted
-cfg.layout    = lay; % specify the layout file that should be used for plotting
-cfg.comment   = 'no';
-ft_topoplotIC(cfg, comp)
+%% reject component:
 
-%view the time course of the component:
-figure(2)
-cfg = [];
-cfg.layout = lay; % specify the layout file that should be used for plotting
-cfg.viewmode = 'component'
-ft_databrowser(cfg, comp)
+function kh_RejectComponent (Path)
 
+    FilePreProc = strcat (Path.Preprocessing, '\', 'Data_bp1_95_nojumps_vis_rej') ;
+    load (FilePreProc)
 
-% Skript von Maor:
+    % run the ICA in the original data (Skript Maor):
+    cfg                 = [];
+    cfg.topo            = comp.topo;
+    cfg.topolabel       = comp.topolabel;
+    comp_orig           = componentanalysis(cfg, datacln);
+    
 
-% run the ICA in the original data
-cfg = [];
-cfg.topo = comp.topo;
-cfg.topolabel = comp.topolabel;
-comp_orig = componentanalysis(cfg, datacln);
+    % set the bad comps as the value for cfgrc.component (Skript Yuval):
+    cfgrc                           = [];
+    cfgrc.component                 = [1 2 3]; % change
+    cfgrc.feedback                  = 'no';
+    data_HB_1_95_nojumps_sum_pca    = ft_rejectcomponent(cfgrc, compMOG_pca, data_HB_pb1_95nojumps_sum);
+   
 
+    cfg                                 = [];
+    cfg.method                          = 'summary'; %trial
+    cfg.channel                         = 'MEG';
+    cfg.alim                            =  1e-12;
+    data_HB_1_95_nojumps_sum_pca_visual = ft_rejectvisual(cfg, data_HB_1_95_nojumps_sum_pca);
 
-%%  Yuval:
+    cfg                                 = [];
+    cfg.method                          =  'summary'; %trial
+    cfg.channel                         = 'MEG';
+    cfg.alim                            = 1e-12;
+    data_HB_1_95_nojumps_sum_pca_visual = ft_rejectvisual(cfg, data_HB_pb1_95nojumps_sum);
 
-startt=1;
-endt=100;
-cfg=[];
-cfg.dataset='hb_c,rfhp0.1Hz';
-cfg.trialdef.beginning=startt;
-cfg.trialdef.end=endt;
-cfg.trialfun='trialfun_raw'; % the other usefull trialfun we have are trialfun_beg and trialfun_BIU
-cfg1=ft_definetrial(cfg);
-cfg1.channel='MEG';
-cfg1.continuous='yes';
-cfg1.bpfilter='yes'
-cfg1.bpfreq=[1 95]
-cfg1.bsfilter='yes'
-cfg1.bsfreq=[50 100]
-cfg1.demean='yes';% old version was: cfg1.blc='yes';
-MOG=ft_preprocessing(cfg1);
-% lets view the raw data for one channel
-cfgb=[];
-cfgb.layout=lay;
-cfgb.continuous='yes';
-cfgb.event.type='';
-cfgb.event.sample=1;
-cfgb.blocksize=3;
-cfgb.channel='A248';
-comppic=ft_databrowser(cfgb,MOG);
+    % um durch Gesamtdaten zu browsen, siehe auch Yuval Course 4
+    cfg=[];
+    cfg.layout=lay;
+    cfg.channel = 1:5;
+    cfg.continuous='yes';
+    ft_databrowser(cfg,data_HB_1_95_nojumps_sum_pca);
 
-% ICA
-cfgp=[];
-cfgc.method='runica';
-compMOG_runica    = ft_componentanalysis(cfgc, MOG);
+    
+    %%
+    % um sich Trials anzusehen
+    cfg = [];
+    cfg.channel = 'MEG';
+    % open the browser and page through the trials
+    artf=ft_databrowser(cfg,data_HB_1_95_nojumps_sum_pca);
 
-% PCA zum Vergleich
-cfgp=[];
-cfgc.method  ='pca';
-compMOG_pca  = ft_componentanalysis(cfgc, MOG);
+    %unklar, ob partial rejection funktioniert,da trials gestückelt werden
+    cfg.artfctdef.reject='partial'
+    cfg.artfctdef.xxx.artifact=artf.artfctdef.visual.artifact
+    data_HB_1_95_nojumps_sum_pca_rejvis=ft_rejectartifact(cfg,data_HB_1_95_nojumps_sum_pca)
 
-% see the components and find the HB and MOG artifact
-% remember the numbers of the bad components and close the data browser
+    
 
-% plot the components for visual inspection
-figure
-cfg3 = [];
-cfg3.component = [1:10];       % specify the component(s) that should be plotted
-cfg3.layout    = lay; % specify the layout file that should be used for plotting
-cfg3.comment   = 'no';
-ft_topoplotIC(cfg3, compMOG_pca)
-
-cfgb=[];
-cfgb.layout=lay;
-%cfgb.channel = {comp.label{1:5}};
-cfg.component = [1:5];
-cfgb.continuous='yes';
-cfgb.event.type='';
-cfgb.event.sample=1;
-cfgb.blocksize=3;
-comppic=ft_databrowser(cfgb,compMOG_pca);
-
-
-
-% set the bad comps as the value for cfgrc.component.
-cfgrc = [];
-cfgrc.component = [1 2 3]; % change
-cfgrc.feedback='no';
-data_HB_1_95_nojumps_sum_pca = ft_rejectcomponent(cfgrc, compMOG_pca, data_HB_pb1_95nojumps_sum);
-save CleanData data_HB_1_95_nojumps_sum_pca
-
-cfg=[];
-cfg.method='summary'; %trial
-cfg.channel='MEG';
-cfg.alim=1e-12;
-data_HB_1_95_nojumps_sum_pca_visual=ft_rejectvisual(cfg, data_HB_1_95_nojumps_sum_pca);
-
-cfg=[];
-cfg.method='summary'; %trial
-cfg.channel='MEG';
-cfg.alim=1e-12;
-data_HB_1_95_nojumps_sum_pca_visual=ft_rejectvisual(cfg, data_HB_pb1_95nojumps_sum);
-
-% um durch Gesamtdaten zu browsen, siehe auch Yuval Course 4
-cfg=[];
-cfg.layout=lay;
-cfg.channel = 1:5;
-cfg.continuous='yes';
-ft_databrowser(cfg,data_HB_1_95_nojumps_sum_pca);
-
-% um sich Trials anzusehen
-cfg = [];
-cfg.channel = 'MEG';
-% open the browser and page through the trials
-artf=ft_databrowser([],data_HB_1_95_nojumps_sum_pca);
-
-%unklar, ob partial rejection funktioniert,da trials gestückelt werden
-cfg.artfctdef.reject='partial'
-cfg.artfctdef.xxx.artifact=artf.artfctdef.visual.artifact
-data_HB_1_95_nojumps_sum_pca_rejvis=ft_rejectartifact(cfg,data_HB_1_95_nojumps_sum_pca)
-
-CleanData = data_HB_1_95_nojumps_sum_pca_rejvis
-
-save CleanData data_HB_1_95_nojumps_sum_pca_rejvis data_HB_1_95_nojumps_sum_pca
+  
 
 end
 

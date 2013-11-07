@@ -1,6 +1,6 @@
 % Plot statistics
 
-function  kh_PlotStatistics( ConfigFile, PathStatsFile, StatsFileName, Path )
+function  kh_PlotStatistics( TimeWindow, ConfigFile, PathStatsFile, StatsFileName, Path )
     
        
         load( strcat( Path.MRI, '\', 'mri_realign_resliced_norm', '.mat' ))   ;    % evtl. nicht das templateMRI nehmen, sondern zu besseren Darstellungszwecken das normalisierte individuelle Gehirn
@@ -21,7 +21,7 @@ function  kh_PlotStatistics( ConfigFile, PathStatsFile, StatsFileName, Path )
         cfg_plot.maskparameter   = 'mask'; 
         cfg_plot.coordsys        = 'spm';
         ft_sourceplot_invisible(cfg_plot, StatsFile_int);
-        title(StatsFile.name);
+        title(strcat( StatsFile.name, {' '}, ConfigFile.Name, {' '}, TimeWindow.TimeWindow_string));
         sourceplot               = strcat(Path.Statistics, '\', ConfigFile.name, '\', StatsFile.name);
         print('-dpng', sourceplot);
         
@@ -42,7 +42,7 @@ function  kh_PlotStatistics( ConfigFile, PathStatsFile, StatsFileName, Path )
         cfg_plot.coordsys        = 'spm';
         ft_sourceplot_invisible(cfg_plot_sign, SignStatsFile_int);
         
-        title(StatsFile.name);
+        title( strcat (StatsFile.name, {' '}, ConfigFile.Name, {' '}, TimeWindow.TimeWindow_string) );
         sourceplot_sign          = strcat(Path.Statistics, '\',  ConfigFile.name, '\', StatsFile.name, '_', 'sign');
         print('-dpng', sourceplot_sign);
     

@@ -1,6 +1,6 @@
 % statistics
 
-function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
+function kh_Statistics( TimeWindow, ConfigFile, Source_Pre, Source_Pst, Path )
 
   % make frequency directory if not exists yet:
     DirFreqName = strcat (Path.Statistics, '\', ConfigFile.name);
@@ -64,10 +64,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
                 Stats_NoROIs                  = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
                 Stats_NoROIs.name             = 'Stats_NoROIs'; % redundant, da auch in kh_PlotStatistics definiert 
                 save( fn_Stats_NoROIs, 'Stats_NoROIs' )
-                kh_PlotStatistics (ConfigFile, fn_Stats_NoROIs, 'Stats_NoROIs', Path)
+                kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_NoROIs, 'Stats_NoROIs', Path)
         else
     
-                kh_PlotStatistics (ConfigFile, fn_Stats_NoROIs, 'Stats_NoROIs', Path) % evtl. andere Plot-Funktion schreiben
+                kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_NoROIs, 'Stats_NoROIs', Path) % evtl. andere Plot-Funktion schreiben
     
         end
     
@@ -106,7 +106,7 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_allRois_both_hem        = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_allRois_both_hem.name   = 'Stats_allRois_both_hem';
             save( fn_Stats_allROIs_both_hem, 'Stats_allRois_both_hem' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_allROIs_both_hem, 'Stats_allRois_both_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_allROIs_both_hem, 'Stats_allRois_both_hem', Path)
             
      else
          kh_PlotStatistics (ConfigFile, fn_Stats_allROIs_both_hem, 'Stats_allRois_both_hem', Path)
@@ -162,10 +162,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Broca_both_hem          = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Broca_both_hem.name     = 'Stats_Broca_both_hem';
             save( fn_Stats_Broca_both_hem, 'Stats_Broca_both_hem' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_both_hem, 'Stats_Broca_both_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Broca_both_hem, 'Stats_Broca_both_hem', Path)
             
         else
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_both_hem, 'Stats_Broca_both_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Broca_both_hem, 'Stats_Broca_both_hem', Path)
             
         end
         
@@ -175,10 +175,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Broca_combined_hem      = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Broca_combined_hem.name = 'Stats_Broca_combined_hem';
             save( fn_Stats_Broca_combined_hem, 'Stats_Broca_combined_hem' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_combined_hem, 'Stats_Broca_combined_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Broca_combined_hem, 'Stats_Broca_combined_hem', Path)
             
         else
-            kh_PlotStatistics (ConfigFile, fn_Stats_Broca_combined_hem, 'Stats_Broca_combined_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Broca_combined_hem, 'Stats_Broca_combined_hem', Path)
             
         end
         
@@ -218,10 +218,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Wernicke_both_hem       = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Wernicke_both_hem.name  = 'Stats_Wernicke_both_hem';
             save( fn_Stats_Wernicke_both_hem, 'Stats_Wernicke_both_hem' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_both_hem, 'Stats_Wernicke_both_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Wernicke_both_hem, 'Stats_Wernicke_both_hem', Path)
              
          else
-             kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_both_hem, 'Stats_Wernicke_both_hem', Path)
+             kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Wernicke_both_hem, 'Stats_Wernicke_both_hem', Path)
              
          end
          
@@ -231,10 +231,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
             Stats_Wernicke_combined_hem      = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
             Stats_Wernicke_combined_hem.name = 'Stats_Wernicke_combined_hem';
             save( fn_Stats_Wernicke_combined_hem, 'Stats_Wernicke_combined_hem' )
-            kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_combined_hem, 'Stats_Wernicke_combined_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Wernicke_combined_hem, 'Stats_Wernicke_combined_hem', Path)
             
          else
-            kh_PlotStatistics (ConfigFile, fn_Stats_Wernicke_combined_hem, 'Stats_Wernicke_combined_hem', Path)
+            kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_Wernicke_combined_hem, 'Stats_Wernicke_combined_hem', Path)
             
          end 
     
@@ -272,10 +272,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
               Stats_TemporalLobe_both_hem      = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
               Stats_TemporalLobe_both_hem.name = 'Stats_TemporalLobe_both_hem';
               save( fn_Stats_TemporalLobe_both_hem, 'Stats_TemporalLobe_both_hem' )
-              kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_both_hem, 'Stats_TemporalLobe_both_hem', Path)
+              kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_TemporalLobe_both_hem, 'Stats_TemporalLobe_both_hem', Path)
               
          else
-              kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_both_hem, 'Stats_TemporalLobe_both_hem', Path)
+              kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_TemporalLobe_both_hem, 'Stats_TemporalLobe_both_hem', Path)
               
          end
          
@@ -285,10 +285,10 @@ function kh_Statistics( ConfigFile, Source_Pre, Source_Pst, Path )
              Stats_TemporalLobe_combined_hem        = ft_sourcestatistics(cfg_stats, Source_PreStim, Source_PstStim); 
              Stats_TemporalLobe_combined_hem.name   = 'Stats_TemporalLobe_combined_hem';
              save( fn_Stats_TemporalLobe_combined_hem, 'Stats_TemporalLobe_combined_hem' )
-             kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_combined_hem, 'Stats_TemporalLobe_combined_hem', Path)
+             kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_TemporalLobe_combined_hem, 'Stats_TemporalLobe_combined_hem', Path)
              
          else
-             kh_PlotStatistics (ConfigFile, fn_Stats_TemporalLobe_combined_hem, 'Stats_TemporalLobe_combined_hem', Path)
+             kh_PlotStatistics (TimeWindow, ConfigFile, fn_Stats_TemporalLobe_combined_hem, 'Stats_TemporalLobe_combined_hem', Path)
              
          end         
     

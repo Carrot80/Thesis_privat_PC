@@ -77,11 +77,11 @@ function analysis ( PatientPath, PatientName)
         % statistics: erstellt automatisch Abbildungen, evtl. noch Info in
         % Configfile, ob er Abbildung erstellen soll oder nicht:
         
-        kh_Statistics( FreqConfig.Beta, 'trial_sourcePre', 'trial_sourcePost', Path) 
-        kh_Statistics( FreqConfig.Alpha, 'trial_sourcePre', 'trial_sourcePost', Path)
-        kh_Statistics( FreqConfig.Theta, 'trial_sourcePre', 'trial_sourcePost', Path)
-        kh_Statistics( FreqConfig.Gamma, 'trial_sourcePre', 'trial_sourcePost', Path)
-        kh_Statistics( FreqConfig.LowGamma, 'trial_sourcePre', 'trial_sourcePost', Path)
+        kh_Statistics( Config, FreqConfig.Beta, 'trial_sourcePre', 'trial_sourcePost', Path) 
+        kh_Statistics( Config, FreqConfig.Alpha, 'trial_sourcePre', 'trial_sourcePost', Path)
+        kh_Statistics( Config, FreqConfig.Theta, 'trial_sourcePre', 'trial_sourcePost', Path)
+        kh_Statistics( Config, FreqConfig.Gamma, 'trial_sourcePre', 'trial_sourcePost', Path)
+        kh_Statistics( Config, FreqConfig.LowGamma, 'trial_sourcePre', 'trial_sourcePost', Path)
 
         
         kh_LateralityIndex (FreqConfig.Beta, 'Stats_allRois_left', 'Stats_allRois_right', Path)

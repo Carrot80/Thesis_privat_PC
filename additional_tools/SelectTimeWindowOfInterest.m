@@ -1,10 +1,11 @@
+% evtl. Funktion schreiben, die mehrere Zeitintervalle hintereinander durchrechnet
 
 function [Config, PathExt] = SelectTimeWindowOfInterest()
 
     Config.Pre          = [];                                           
     Config.Pre.toilim   = [-0.5 -0.3];
     Config.Post         = [];
-    Config.Post.toilim  = [0.4 0.6]; 
+    Config.Post.toilim  = [0.2 0.4]; 
 
     Config.TimeWindow_ms = [];
     Config.TimeWindow_ms = (Config.Post.toilim*1000);
