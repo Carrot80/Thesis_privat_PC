@@ -1,4 +1,10 @@
-function CheckDataQuality_BIU (Path)
+function CheckDataQuality_BIU (Path, PatientName)
+
+PathPlot = strcat (Path.Preprocessing, '\', 'MeanMEG', '.fig') ;
+
+if exist (PathPlot, 'file')
+    return
+end
 
 % plot the mean MEG:
 
@@ -8,12 +14,13 @@ function CheckDataQuality_BIU (Path)
     data            = read_data_block( p, [], chi ) ;
     samplingRate    = get( p,'dr' ) ;
     tMEG            = ( 0:size(data,2)-1 )/samplingRate ;
-    h = figure('visible','off'); 
+    h = figure('visible','on'); 
     plot(tMEG,mean(data))
     PathPlot        = strcat(Path.Preprocessing, '\', 'MeanMEG') ;
     NameTitle       = strcat ('Mean MEG', {' '}, '-', {' '}, PatientName)
     title (NameTitle) ;
     print('-dpng', PathPlot) ;
+    saveas(h, PathPlot, 'fig')
     
     %    CleanMEG_BIU (fileName) % Funktion funktioniert noch nicht
     
