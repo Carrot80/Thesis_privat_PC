@@ -20,7 +20,7 @@ function analysis ( PatientPath, PatientName)
       
         [Config, PathExt] = SelectTimeWindowOfInterest(); % evtl. in FreqConfig integrieren
             
-        % Reject all other patients but Illek
+        % Reject all other patients but this one:
         if ( 0 == strcmp (PatientPath, 'C:\Kirsten\DatenDoktorarbeit\Kontrollen\zzz_si_Illek'))
             return;
         end

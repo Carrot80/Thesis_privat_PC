@@ -27,7 +27,7 @@
     cfg_preproc.bpfilter    = 'yes' ;
     cfg_preproc.bpfreq      = [1 95] ;
     cfg_preproc.bsfilter    = 'yes' ;
-    cfg_preproc.bsfreq      = [50 100] ;
+    cfg_preproc.bsfreq      = [16.667 50 100] ; % 16.67 Hz is train noise
     Data1_95Hz              = ft_preprocessing(Data) ;
     
     PathData = strcat (Path.Preprocessing, '\', 'Data1_95Hz') ;
