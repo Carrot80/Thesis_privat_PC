@@ -17,11 +17,11 @@ end
 %%  Main function
 
 function analysis ( PatientPath, PatientName)
-        
+      
         [Config, PathExt] = SelectTimeWindowOfInterest(); % evtl. in FreqConfig integrieren
             
         % Reject all other patients but this one:
-        if ( 0 == strcmp (PatientPath, 'D:\data_test\controls\zzz_si_Illek') )
+        if ( 0 == strcmp (PatientPath, 'D:\data_test\controls\') )
             return;
         end
         
@@ -60,8 +60,6 @@ function analysis ( PatientPath, PatientName)
         
         tic
         kh_SourceAnalysis (FreqConfig.Beta, 'Data', 'MRI_realignment', 'Volume', Path)
-       toc
-        
         kh_SourceAnalysis (FreqConfig.Alpha, 'Data', 'MRI_realignment', 'Volume', Path)
         kh_SourceAnalysis (FreqConfig.Theta, 'Data', 'MRI_realignment', 'Volume', Path)
         kh_SourceAnalysis (FreqConfig.Gamma, 'Data', 'MRI_realignment', 'Volume', Path)
@@ -110,7 +108,7 @@ function analysis ( PatientPath, PatientName)
         kh_LateralityIndex (FreqConfig.LowGamma, 'Stats_Broca_left', 'Stats_Broca_right', Path)                    
         kh_LateralityIndex (FreqConfig.LowGamma, 'Stats_Wernicke_left', 'Stats_Wernicke_right', Path)        
         kh_LateralityIndex (FreqConfig.LowGamma, 'Stats_TemporalLobe_left', 'Stats_TemporalLobe_right', Path)
-        toc
+
       
 end
 

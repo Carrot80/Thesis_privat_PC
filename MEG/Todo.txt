@@ -1,4 +1,5 @@
 to do:
 
 - Frequenzanalyse erweitern, so dass Spectrum zu sehen ist
-- 
+- mehrere Zeitintervalle gleichzeitig analysieren
+- time offset hinzufügen , 34 ms bzw. 10 ms , noch mal schauen, bei wem welcher offset ist
